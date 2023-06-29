@@ -7,12 +7,11 @@ Created on Mon Oct  5 15:21:49 2020
 The program requires to be at the surface of sample.
 """
 
+import time
+import os
 import numpy as np
 from matplotlib import pyplot as plt
 import asc500_base as asc
-import time
-import pandas as pd
-import os
 import AMC as AMC
 
 date = time.strftime("%Y-%m-%d", time.gmtime())
@@ -116,7 +115,6 @@ y_pos = np.arange(0, Area_y, resolution)
 
 #%% Initialize the size of the heatmap (and other stuff)
 heatmap = np.ones((len(y_pos), len(x_pos), len(z_pos)))
-heatmap_dump = np.ones((len(y_pos), len(x_pos), len(z_pos)))
 all_counts = []
 
 #%% Start scanning loop
@@ -136,7 +134,7 @@ for i, z in enumerate(z_pos):
         posi.setMove(axis_y,True)
         while posi.getStatusMoving(axis_y)[1] == 1: pass
         posi.setMove(axis_y,False)#
-        if (k%2==0):
+        if k%2 == 0:
             x_pos_shuf = x_pos
         else:
             x_pos_shuf = x_pos[::-1]
@@ -150,25 +148,33 @@ for i, z in enumerate(z_pos):
                 pass
             posi.setMove(axis_x,False)
             time.sleep(0.07)
+            # Take a measure twice and dump it...
             do_meas(chnNo, bufSize)
-            means_dump, times_dump, counts_dump = do_meas(chnNo, bufSize)
+            do_meas(chnNo, bufSize)
+            # Then take a final measurement
             sum_counts, times, counts = do_meas(chnNo, bufSize)
             all_counts.append(counts)
-            if (k%2!=0):
+            if k%2 != 0:
                 l = len(x_pos_shuf)-1-l
-            sum_counts = sum_counts / bufSize * 1000
+            sum_counts = sum_counts / bufSize * 1000 # kilo counts per seconds
             heatmap[k,l,i] = sum_counts
-            heatmap_dump[k,l,i] = means_dump
 
             totalPixels += 1
             pixelTimes.append(time.perf_counter() - pixelTimer)
             if len(lineTimes) > 0:
-                timeRemaining = np.mean([(len(y_pos)*len(x_pos)*len(z_pos)-totalPixels)*np.mean(pixelTimes), (len(y_pos)-k)*np.mean(lineTimes)])
+                timeRemaining = np.mean([(len(y_pos)*len(x_pos)*len(z_pos)-totalPixels)*np.mean(pixelTimes),
+                                         (len(y_pos)-k)*np.mean(lineTimes)])
             else:
                 timeRemaining = (len(y_pos)*len(x_pos)*len(z_pos)-totalPixels)*np.mean(pixelTimes)
             m, s = divmod(timeRemaining, 60)
             h, m = divmod(m, 60)
-            print('\rScan progress: {}%\tEstimated time remaining: {}:{}:{}    '.format(percentageCalculator(totalPixels, len(y_pos)*len(x_pos)*len(z_pos)), int(h), int(m), int(s)), end='', flush=True)
+            print('\rScan progress: {}%\tEstimated time remaining: {}:{}:{}    '.format(
+                percentageCalculator(totalPixels,
+                                     len(y_pos) * len(x_pos) * len(z_pos)),
+                                     int(h),
+                                     int(m),
+                                     int(s)),
+                                     end='', flush=True)
 
         print(str(k+1) + ' of ' + str(len(y_pos)) + ' rows scanned in '+
               str(i+1) + ' of ' + str(len(z_pos)) + ' planes')
@@ -212,8 +218,7 @@ for i, z in enumerate(z_pos):
                 format = SAVE_FORMAT, dpi=1200, bbox_inches='tight')
 
 
-meta_file = open(os.path.join(SAVE_PATH,
-                          ('meta_data' + str(z) + '.txt')), "w")
+meta_file = open(os.path.join(SAVE_PATH, ('meta_data' + str(z) + '.txt')), "w")
 meta_file.write('ASC-Settings:' + '\n' +
                 '\t Exposure Time: ' + str(expTime) + '\n' +
                 '\t Sampling Time: ' + str(sampTime) + '\n' +
