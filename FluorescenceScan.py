@@ -100,7 +100,7 @@ def do_meas(chnNo, bufSize):
             break
     time_init.append(round(time.perf_counter(),2) - time_start)
     out = asc500.getDataBuffer(chnNo, 0, bufSize)
-    counts= np.asarray(out[3][:])
+    counts = np.asarray(out[3][:])
     means_init.append(np.mean(counts))
     sum_counts = sum(counts)
     time_end = round(time.perf_counter(),2) - time_start
@@ -108,15 +108,15 @@ def do_meas(chnNo, bufSize):
     return sum_counts, time_init, counts
 def percentageCalculator(value, maxVal):
     return round((value*100/maxVal),2)
-#%%Caclulate x and y arrays for scanning loop
+
+#%% Calculate x and y arrays for scanning loop
 x_pos = np.arange(0, Area_x, resolution)
 y_pos = np.arange(0, Area_y, resolution)
 
-#%%initialize the size of the heatmap (and other stuff)
+#%% Initialize the size of the heatmap (and other stuff)
 heatmap = np.ones((len(y_pos), len(x_pos), len(z_pos)))
 heatmap_dump = np.ones((len(y_pos), len(x_pos), len(z_pos)))
 all_counts = []
-# df = pd.DataFrame(columns= ['x-pos', 'y-pos', 'means'])
 
 #%% Start scanning loop
 timer_all = round(time.perf_counter(),2)
@@ -158,8 +158,7 @@ for i, z in enumerate(z_pos):
             means = means/bufSize * 1000
             heatmap[k,l,i] = means
             heatmap_dump[k,l,i] = means_dump
-            # df1 = pd.DataFrame({'x-pos': x, 'y-pos': y, 'means': means})
-            # df = pd.concat(df, df1)
+
             totalPixels += 1
             pixelTimes.append(time.perf_counter() - pixelTimer)
             if len(lineTimes) > 0:
@@ -181,7 +180,7 @@ for i, z in enumerate(z_pos):
     #     posi.setMove(axis,False)#
 duration = round((time.perf_counter() - timer_all),2)
 print('Duration of scan: ' + str(duration))
-# df.to_csv(os.path.join(SAVE_PATH, ('Scan.csv')), index=False)
+
 np.save(os.path.join(SAVE_PATH,
                      ('SCAN_' + str(Area_x) + ' x ' + str(Area_y) + '_heatmap')),
         heatmap)
