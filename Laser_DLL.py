@@ -5,7 +5,6 @@ Created on Thu Mar 12 16:43:05 2020
 @author: grundch
 """
 
-
 import serial
 import time
 
@@ -778,8 +777,6 @@ class iBeam():
 
         '''
         self.ser.write(b'pass reset')
-
-    #def
 
     # =============================================================================
     #   Other useful functions
