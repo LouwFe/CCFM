@@ -11,13 +11,16 @@ import time
 import os
 import numpy as np
 from matplotlib import pyplot as plt
-import asc500_base as asc
+from ASClib import ASC500
 import AMC as AMC
+
+#%% Create directories for saving data
 
 date = time.strftime("%Y-%m-%d", time.gmtime())
 SAVE_PATH = os.path.join('Data_Step_SCAN', date)
 if not os.path.exists(SAVE_PATH):
     os.makedirs(SAVE_PATH)
+
 time_now = time.strftime("%H-%M-%S", time.localtime())
 SAVE_PATH = os.path.join(SAVE_PATH, time_now)
 if not os.path.exists(SAVE_PATH):
@@ -29,9 +32,9 @@ SAVE_FORMAT = 'png'
 FSIZE = (11. / 2.54, 9. / 2.54)
 
 #%% Config Scan Parameters
-Area_x = 5 #in um
-Area_y = 5 #in um
-resolution = 0.1 #in um
+Area_x = 5 # in um
+Area_y = 5 # in um
+resolution = 0.1 # in um
 z_pos = [14, 17, 20, 23, 26, 29, 32, 35, 38]
 z_pos = [0]
 area = (str(Area_x) + 'x' + str(Area_y))
@@ -45,19 +48,21 @@ bufSize = 160
 
 binPath = "Installer\\ASC500CL-V2.7.13\\"
 dllPath = "64bit_lib\\ASC500CL-LIB-WIN64-V2.7.13\\daisybase\\lib\\"
-asc500 = asc.ASC500Base(binPath, dllPath)
-asc500.startServer()
-#asc500.sendProfile('Installer\\ASC500CL-V2.7.13\\afm.ngp')
-asc500.setDataEnable(1)
-asc500.configureChannel(chnNo,
-                        asc500.getConst('CHANCONN_PERMANENT'),
-                        asc500.getConst('CHANADC_COUNTER'),
-                        average,
-                        sampTime)
-print(asc500.getChannelConfig(chnNo))
-asc500.configureDataBuffering(chnNo, bufSize)
-asc500.setCounterExposureTime(expTime)
-print("Exposure time ", asc500.getCounterExposureTime())
+asc500 = ASC500(binPath, dllPath)
+asc500.base.startServer()
+#asc500.base.sendProfile('Installer\\ASC500CL-V2.7.13\\afm.ngp')
+asc500.data.setDataEnable(1)
+asc500.data.configureChannel(chnNo,
+                             asc500.base.getConst('CHANCONN_PERMANENT'),
+                             asc500.base.getConst('CHANADC_COUNTER'),
+                             average,
+                             sampTime)
+
+asc500.data.configureDataBuffering(chnNo, bufSize)
+asc500.data.setCounterExposureTime(expTime)
+
+print(asc500.data.getChannelConfig(chnNo))
+print("Exposure time ", asc500.data.getCounterExposureTime())
 
 #%% Config Laser
 laser_pow = '4.5'
@@ -95,10 +100,10 @@ def do_meas(chnNo, bufSize):
     time_start = round(time.perf_counter(),2)
     while True:
         # Wait until buffer is full
-        if asc500.waitForFullBuffer(chnNo) != 0:
+        if asc500.data.waitForFullBuffer(chnNo) != 0:
             break
     time_init.append(round(time.perf_counter(),2) - time_start)
-    out = asc500.getDataBuffer(chnNo, 0, bufSize)
+    out = asc500.data.getDataBuffer(chnNo, 0, bufSize)
     counts = np.asarray(out[3][:])
     means_init.append(np.mean(counts))
     sum_counts = sum(counts)
@@ -233,9 +238,9 @@ meta_file.write('ASC-Settings:' + '\n' +
 meta_file.close()
 
 #%% Close devices
-asc500.setCounterExposureTime(163e-3)
+asc500.data.setCounterExposureTime(163e-3)
 
-asc500.stopServer()
+asc500.base.stopServer()
 # laser.setLaserOFF()
 # laser.disconnect()
 
