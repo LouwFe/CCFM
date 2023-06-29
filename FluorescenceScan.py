@@ -44,11 +44,11 @@ average = 0
 chnNo = 0
 bufSize = 160
 
-binPath = "Installer\\ASC500CL-V2.7.6\\"
-dllPath = "64bit_lib\\ASC500CL-LIB-WIN64-V2.7.6\\daisybase\\lib\\"
+binPath = "Installer\\ASC500CL-V2.7.13\\"
+dllPath = "64bit_lib\\ASC500CL-LIB-WIN64-V2.7.13\\daisybase\\lib\\"
 asc500 = asc.ASC500Base(binPath, dllPath)
 asc500.startServer()
-#asc500.sendProfile('Installer\\ASC500CL-V2.7.6\\afm.ngp')
+#asc500.sendProfile('Installer\\ASC500CL-V2.7.13\\afm.ngp')
 asc500.setDataEnable(1)
 asc500.configureChannel(chnNo,
                         asc500.getConst('CHANCONN_PERMANENT'),
