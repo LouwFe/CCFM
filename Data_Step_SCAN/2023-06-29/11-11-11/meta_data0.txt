@@ -1,0 +1,10 @@
+ASC-Settings:
+	 Exposure Time: 0.001
+	 Sampling Time: 0.001
+	 Buffer size: 160
+
+Scanning Settings
+	 Area: 5 x 5
+	 Depth(s): [0]
+General:
+	 Measurement Duration: 1200.07 s
