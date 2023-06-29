@@ -106,6 +106,7 @@ def do_meas(chnNo, bufSize):
     time_end = round(time.perf_counter(),2) - time_start
     #print('Duration: ' + str(time_end) + ' s')
     return sum_counts, time_init, counts
+
 def percentageCalculator(value, maxVal):
     return round((value*100/maxVal),2)
 
@@ -151,12 +152,12 @@ for i, z in enumerate(z_pos):
             time.sleep(0.07)
             do_meas(chnNo, bufSize)
             means_dump, times_dump, counts_dump = do_meas(chnNo, bufSize)
-            means, times, counts = do_meas(chnNo, bufSize)
+            sum_counts, times, counts = do_meas(chnNo, bufSize)
             all_counts.append(counts)
             if (k%2!=0):
                 l = len(x_pos_shuf)-1-l
-            means = means/bufSize * 1000
-            heatmap[k,l,i] = means
+            sum_counts = sum_counts / bufSize * 1000
+            heatmap[k,l,i] = sum_counts
             heatmap_dump[k,l,i] = means_dump
 
             totalPixels += 1
@@ -169,8 +170,8 @@ for i, z in enumerate(z_pos):
             h, m = divmod(m, 60)
             print('\rScan progress: {}%\tEstimated time remaining: {}:{}:{}    '.format(percentageCalculator(totalPixels, len(y_pos)*len(x_pos)*len(z_pos)), int(h), int(m), int(s)), end='', flush=True)
 
-        print(str(k+1) + ' of ' + str(len(y_pos)) + 'rows scanned in '+
-              str(i+1) + 'of' + str(len(z_pos)) + ' planes')
+        print(str(k+1) + ' of ' + str(len(y_pos)) + ' rows scanned in '+
+              str(i+1) + ' of ' + str(len(z_pos)) + ' planes')
         lineTimes.append(time.perf_counter() - lineTimer)
         #print('Counts: ' + str(means))
     # for axis in posi_axis:
