@@ -21,20 +21,318 @@ Date Author Description
 
 """
 
-import ACS
-import System
+import socket
+import json
 
-class Device(ACS.Device, System.Device):
+class ACSDevice:
+    TCP_PORT   = 9090
+    is_open    = False
+    request_id = 0
+
+    def __init__(self, address):
+        self.address  = address
+        self.language = 0
+
+    def __del__(self):
+        self.close()
+
+    def connect(self):
+        """
+            Initializes and connects the selected AMC device.
+
+        Parameters
+        ----------
+        IP : str
+            Address of the device to connect
+        """
+        if not self.is_open:
+            tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            tcp.settimeout(10)
+            tcp.connect((self.address, self.TCP_PORT))
+            self.tcp = tcp
+            self.bufferedSocket = tcp.makefile("rwb", newline='\r\n')
+            self.is_open = True
+        return self.tcp
+
+    def close(self):
+        """
+            Closes the connection to the device.
+
+        Returns
+        -------
+        """
+        if self.is_open:
+            self.bufferedSocket.close()
+            self.tcp.close()
+            self.is_open = False
+
+    def sendRequest(self, method, params=False):
+        req = {
+                "jsonrpc": "2.0",
+                "method": method,
+                "id": self.request_id
+                }
+        if params:
+            req["params"] = params
+        self.bufferedSocket.write(bytes(json.dumps(req), 'utf-8'))
+        self.bufferedSocket.flush()
+        self.request_id = self.request_id + 1
+
+    def getResponse(self):
+        response = self.bufferedSocket.readline().decode('utf-8')
+        return json.loads(response)
+
+    def request(self,method,params=False):
+        """ Synchronous request.
+        """
+        if not self.is_open:
+            raise Exception("not connected, use connect()");
+        self.sendRequest(method, params)
+        return self.getResponse()
+
+    def handleError(self, response):
+        if response.get('error', False):
+            raise Exception("JSON error in %s" % response['error'])
+        errNo = response['result'][0]
+        if (errNo != 0 and errNo != 'null'):
+            raise Exception(("Error! " + str(self.errorNumberToString(errNo))))
+        return errNo
+
+
+class SysDevice:
+    def printError(self, errorNumber):
+        """ Converts the errorNumber into an error string an prints it to the
+        console.
+
+        Parameters
+        ----------
+        errorNumber : int
+        """
+        print("Error! " + str(self.errorNumberToString(errorNumber)))
+
+    def errorNumberToString(self, errorNumber):
+        """ This function “translates” the error code into an error text and
+        adds it to the error out cluster.
+
+        Parameters
+        ----------
+        language : int
+            value corresponding to language in which the error should return
+            0 – System language
+            1 – English (not implemented yet!)
+        errorNumber : int
+            error code to translate
+
+        Returns
+        -------
+        error : str
+           error message
+        """
+        response = self.request("com.attocube.system.errorNumberToString", [self.language, errorNumber])
+        return response['result'][0]
+
+    def getLockStatus(self):
+        """ This function gets information whether the device is locked and if
+        access is authorized.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        locked : bool
+            indicates if locked
+        authorized : bool
+            indicates if access is granted
+        """
+        response = self.request("getLockStatus")
+        return response['result'][0], response['result'][1]
+
+    def lock(self, password):
+        """ This function locks the device, so the calling of functions is
+        only possible with valid password.
+
+        Parameters
+        ----------
+        password : str
+            password for locking the Device
+
+        Returns
+        -------
+        errorNumber : int
+            No error = 0
+        """
+        response = self.request("lock", [password])
+        return response['result'][0]
+
+    def grantAccess(self, password):
+        """ This function requests access to a locked device, so all functions
+        can be called after entering the correct password. Otherwise, each
+        function creates an error.
+
+        Parameters
+        ----------
+        password : str
+            password for locking the Device
+
+        Returns
+        -------
+        errorNumber : int
+            No error = 0
+        """
+        response = self.request("grantAccess", [password])
+        return response['result'][0]
+
+    def unlock(self):
+        """ This function unlocks the device, so it will not be necessary to
+        execute the grantAccess function to run any VI.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        errorNumber : int
+            No error = 0
+        """
+        response = self.request("unlock")
+        return response['result'][0]
+
+    def getFirmwareVersion(self):
+        """ This function gets the version number of the controller’s firmware.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        errorNumber : int
+            No error = 0
+        version : str
+            firmware version number
+        """
+        response = self.request("com.attocube.system.getFirmwareVersion")
+        return  response['result'][0]
+
+    def rebootSystem(self):
+        """ This function reboots the device.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        errorNumber : int
+            No error = 0
+        """
+        response = self.request("com.attocube.system.rebootSystem")
+        return response['result'][0]
+
+
+    def factoryReset(self):
+        """ This function resets the device to the factory settings when it's
+        booted the next time.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        errorNumber : int
+            No error = 0
+        """
+        response = self.request("com.attocube.system.factoryReset")
+        return response['result'][0]
+
+    def getMacAddress(self):
+        """ This function gets the MAC address of the device.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        errorNumber : int
+            No error = 0
+        mac : str
+            MAC address
+        """
+        response = self.request("com.attocube.system.getMacAddress")
+        return  response['result'][0]
+
+    def getIPAddress(self):
+        """ This function gets the IP address of the device.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        errorNumber : int
+            No error = 0
+        mac : str
+            MAC address
+        """
+        response = self.request("com.attocube.system.network.getIpAddress")
+        return  response['result'][0]
+
+    def getSerialNumber(self):
+        """ This function gets the device’s serial number.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        SN : str
+            Serial number
+        """
+        response = self.request("com.attocube.system.getSerialNumber")
+        return  response['result'][0]
+
+    def getDeviceName(self):
+        """ This function gets the device's name.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        errorNumber : int
+            No error = 0
+        Devicename : str
+            get device name
+        """
+        response = self.request("com.attocube.system.getDeviceName")
+        return  response['result'][0]
+
+    def setDeviceName(self, devicename):
+        """ This function sets the device’s name.
+
+        Parameters
+        ----------
+        Devicename : str
+            set device name
+
+        Returns
+        -------
+        errorNumber : int
+            No error = 0
+        """
+        response = self.request("com.attocube.system.setDeviceName", [devicename])
+        return response['result'][0]
+
+class Device(ACSDevice, SysDevice):
     def setActorParametersByParamName(self, axis, paramname, paramvalue):
         """
         Control the actors parameters of an actor parameter  name ( search through an internal parameter list)  for integer paramaters
-        
+
         Parameters
         ----------
         axis:  [0|1|2]
         paramname:  possible parameter:  actortype (0 to 2), fmax (> freqmin < freqmax controller),amax (> 0 < ampmax controller)
       sensor_dir(boolean), pitchofgrading(>0), sensitivity  ( 1 to 15) , stepsize (>0)
-        paramvalue: 
+        paramvalue:
         Returns
         -------
         errNo: errNo
@@ -611,7 +909,7 @@ class Device(ACS.Device, System.Device):
         """
             Set the range around the target position in which the flag "In Target Range"
             becomes active.
-            
+
         Parameters
         ----------
         axis : int
