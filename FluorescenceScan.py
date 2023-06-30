@@ -19,12 +19,12 @@ from AMClib import AMC
 
 #%% Create directories for saving data
 
-date = time.strftime("%Y-%m-%d", time.gmtime())
+date = time.strftime('%Y-%m-%d', time.gmtime())
 SAVE_PATH = os.path.join('Data_Step_SCAN', date)
 if not os.path.exists(SAVE_PATH):
     os.makedirs(SAVE_PATH)
 
-time_now = time.strftime("%H-%M-%S", time.localtime())
+time_now = time.strftime('%H-%M-%S', time.localtime())
 SAVE_PATH = os.path.join(SAVE_PATH, time_now)
 if not os.path.exists(SAVE_PATH):
     os.makedirs(SAVE_PATH)
@@ -49,8 +49,8 @@ average = 0
 chnNo = 0
 bufSize = 160
 
-binPath = "Installer\\ASC500CL-V2.7.13\\"
-dllPath = "64bit_lib\\ASC500CL-LIB-WIN64-V2.7.13\\daisybase\\lib\\"
+binPath = 'Installer\\ASC500CL-V2.7.13\\'
+dllPath = '64bit_lib\\ASC500CL-LIB-WIN64-V2.7.13\\daisybase\\lib\\'
 asc500 = ASC500(binPath, dllPath)
 asc500.base.startServer()
 #asc500.base.sendProfile('Installer\\ASC500CL-V2.7.13\\afm.ngp')
@@ -65,7 +65,7 @@ asc500.data.configureDataBuffering(chnNo, bufSize)
 asc500.data.setCounterExposureTime(expTime)
 
 print(asc500.data.getChannelConfig(chnNo))
-print("Exposure time ", asc500.data.getCounterExposureTime())
+print('Exposure time ', asc500.data.getCounterExposureTime())
 
 #%% Config Laser
 laser_pow = '4.5'
@@ -85,9 +85,9 @@ time.sleep(1)
 #TODO: move x to zero
 posi = AMC.Device('192.168.1.1')
 posi.connect()
-posi_axis = [0,1,2]
+posi_axis = [0, 1, 2]
 for axis in posi_axis:
-    posi.control.setControlOutput(posi_axis,True)
+    posi.control.setControlOutput(posi_axis, True)
     posi.move.setControlEotOutputDeactive(posi_axis, True)
     #posi.setReset(axis)
 
@@ -100,22 +100,22 @@ def do_meas(chnNo, bufSize):
     means_init = []
     time_init = []
     #print('Starting init measurement')
-    time_start = round(time.perf_counter(),2)
+    time_start = round(time.perf_counter(), 2)
     while True:
         # Wait until buffer is full
         if asc500.data.waitForFullBuffer(chnNo) != 0:
             break
-    time_init.append(round(time.perf_counter(),2) - time_start)
+    time_init.append(round(time.perf_counter(), 2) - time_start)
     out = asc500.data.getDataBuffer(chnNo, 0, bufSize)
     counts = np.asarray(out[3][:])
     means_init.append(np.mean(counts))
     sum_counts = sum(counts)
-    time_end = round(time.perf_counter(),2) - time_start
+    time_end = round(time.perf_counter(), 2) - time_start
     #print('Duration: ' + str(time_end) + ' s')
     return sum_counts, time_init, counts
 
 def percentageCalculator(value, maxVal):
-    return round((value*100/maxVal),2)
+    return round((value * 100 / maxVal), 2)
 
 #%% Calculate x and y arrays for scanning loop
 x_pos = np.arange(0, Area_x, resolution)
@@ -126,22 +126,22 @@ heatmap = np.ones((len(y_pos), len(x_pos), len(z_pos)))
 all_counts = []
 
 #%% Start scanning loop
-timer_all = round(time.perf_counter(),2)
+timer_all = round(time.perf_counter(), 2)
 lineTimes = []
 pixelTimes = []
 totalPixels = 0
 
 for i, z in enumerate(z_pos):
-    posi.move.setControlTargetPosition(axis_z, z*1e3)
-    posi.control.setControlMove(axis_z,True)
+    posi.move.setControlTargetPosition(axis_z, z * 1e3)
+    posi.control.setControlMove(axis_z, True)
     while posi.status.getStatusMoving(axis_z)[1] == 1: pass
-    posi.control.setControlMove(axis_z,False)
+    posi.control.setControlMove(axis_z, False)
     for k, y in enumerate(y_pos):
         lineTimer = time.perf_counter()
-        posi.move.setControlTargetPosition(axis_y, y*1e3)
-        posi.control.setControlMove(axis_y,True)
+        posi.move.setControlTargetPosition(axis_y, y * 1e3)
+        posi.control.setControlMove(axis_y, True)
         while posi.status.getStatusMoving(axis_y)[1] == 1: pass
-        posi.control.setControlMove(axis_y,False)#
+        posi.control.setControlMove(axis_y, False)
         if k%2 == 0:
             x_pos_shuf = x_pos
         else:
@@ -150,11 +150,11 @@ for i, z in enumerate(z_pos):
         for l, x in enumerate(x_pos_shuf):
             pixelTimer = time.perf_counter()
 
-            posi.move.setControlTargetPosition(axis_x, x*1e3)
-            posi.control.setControlMove(axis_x,True)
+            posi.move.setControlTargetPosition(axis_x, x * 1e3)
+            posi.control.setControlMove(axis_x, True)
             while posi.status.getStatusMoving(axis_x)[1] == 1:
                 pass
-            posi.control.setControlMove(axis_x,False)
+            posi.control.setControlMove(axis_x, False)
             time.sleep(0.07)
             # Take a measure twice and dump it...
             do_meas(chnNo, bufSize)
@@ -163,17 +163,17 @@ for i, z in enumerate(z_pos):
             sum_counts, times, counts = do_meas(chnNo, bufSize)
             all_counts.append(counts)
             if k%2 != 0:
-                l = len(x_pos_shuf)-1-l
+                l = len(x_pos_shuf) - 1 - l
             sum_counts = sum_counts / bufSize * 1000 # kilo counts per seconds
             heatmap[k,l,i] = sum_counts
 
             totalPixels += 1
             pixelTimes.append(time.perf_counter() - pixelTimer)
             if len(lineTimes) > 0:
-                timeRemaining = np.mean([(len(y_pos)*len(x_pos)*len(z_pos)-totalPixels)*np.mean(pixelTimes),
-                                         (len(y_pos)-k)*np.mean(lineTimes)])
+                timeRemaining = np.mean([(len(y_pos) * len(x_pos) * len(z_pos) - totalPixels) * np.mean(pixelTimes),
+                                         (len(y_pos) - k) * np.mean(lineTimes)])
             else:
-                timeRemaining = (len(y_pos)*len(x_pos)*len(z_pos)-totalPixels)*np.mean(pixelTimes)
+                timeRemaining = (len(y_pos) * len(x_pos) * len(z_pos) - totalPixels) * np.mean(pixelTimes)
             m, s = divmod(timeRemaining, 60)
             h, m = divmod(m, 60)
             print('\rScan progress: {}%\tEstimated time remaining: {}:{}:{}    '.format(
@@ -184,16 +184,16 @@ for i, z in enumerate(z_pos):
                                      int(s)),
                                      end='', flush=True)
 
-        print(str(k+1) + ' of ' + str(len(y_pos)) + ' rows scanned in '+
-              str(i+1) + ' of ' + str(len(z_pos)) + ' planes')
+        print(str(k + 1) + ' of ' + str(len(y_pos)) + ' rows scanned in '+
+              str(i + 1) + ' of ' + str(len(z_pos)) + ' planes')
         lineTimes.append(time.perf_counter() - lineTimer)
         #print('Counts: ' + str(means))
     # for axis in posi_axis:
-    #     posi.move.setControlTargetPosition(axis, 0*1e3)
-    #     posi.control.setControlMove(axis,True)
+    #     posi.move.setControlTargetPosition(axis, 0 * 1e3)
+    #     posi.control.setControlMove(axis, True)
     #     while posi.status.getStatusMoving(axis)[1] == 1: pass
-    #     posi.control.setControlMove(axis,False)#
-duration = round((time.perf_counter() - timer_all),2)
+    #     posi.control.setControlMove(axis, False)#
+duration = round((time.perf_counter() - timer_all), 2)
 print('Duration of scan: ' + str(duration))
 
 np.save(os.path.join(SAVE_PATH,
@@ -214,8 +214,8 @@ for i, z in enumerate(z_pos):
     xticks, ylabels = plt.xticks()
     ylabels = yticks*resolution
     xlabels = xticks*resolution
-    plt.yticks(yticks[1:-1],ylabels[1:-1])
-    plt.xticks(xticks[1:-1],xlabels[1:-1])
+    plt.yticks(yticks[1:-1], ylabels[1:-1])
+    plt.xticks(xticks[1:-1], xlabels[1:-1])
     plt.text(0,yticks[-1]+((yticks[-1]-yticks[-2])), param_dict, fontsize=7,
              bbox={'facecolor': 'white', 'alpha': 0.5, 'pad': 1})
 
