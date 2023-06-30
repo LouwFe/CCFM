@@ -12,7 +12,6 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt
 from ASClib import ASC500
-# import AMC as AMC
 from AMClib import AMC
 
 #%% Create directories for saving data
@@ -132,13 +131,13 @@ totalPixels = 0
 for i, z in enumerate(z_pos):
     posi.move.setControlTargetPosition(axis_z, z*1e3)
     posi.control.setControlMove(axis_z,True)
-    while posi.getStatusMoving(axis_z)[1] == 1: pass
+    while posi.status.getStatusMoving(axis_z)[1] == 1: pass
     posi.control.setControlMove(axis_z,False)
     for k, y in enumerate(y_pos):
         lineTimer = time.perf_counter()
         posi.move.setControlTargetPosition(axis_y, y*1e3)
         posi.control.setControlMove(axis_y,True)
-        while posi.getStatusMoving(axis_y)[1] == 1: pass
+        while posi.status.getStatusMoving(axis_y)[1] == 1: pass
         posi.control.setControlMove(axis_y,False)#
         if k%2 == 0:
             x_pos_shuf = x_pos
@@ -150,7 +149,7 @@ for i, z in enumerate(z_pos):
 
             posi.move.setControlTargetPosition(axis_x, x*1e3)
             posi.control.setControlMove(axis_x,True)
-            while posi.getStatusMoving(axis_x)[1] == 1:
+            while posi.status.getStatusMoving(axis_x)[1] == 1:
                 pass
             posi.control.setControlMove(axis_x,False)
             time.sleep(0.07)
@@ -189,7 +188,7 @@ for i, z in enumerate(z_pos):
     # for axis in posi_axis:
     #     posi.move.setControlTargetPosition(axis, 0*1e3)
     #     posi.control.setControlMove(axis,True)
-    #     while posi.getStatusMoving(axis)[1] == 1: pass
+    #     while posi.status.getStatusMoving(axis)[1] == 1: pass
     #     posi.control.setControlMove(axis,False)#
 duration = round((time.perf_counter() - timer_all),2)
 print('Duration of scan: ' + str(duration))
