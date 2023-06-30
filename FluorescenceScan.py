@@ -12,7 +12,8 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt
 from ASClib import ASC500
-import AMC as AMC
+# import AMC as AMC
+from AMClib import AMC
 
 #%% Create directories for saving data
 
@@ -84,8 +85,8 @@ posi = AMC.Device('192.168.1.1')
 posi.connect()
 posi_axis = [0,1,2]
 for axis in posi_axis:
-    posi.setOutput(posi_axis,True)
-    posi.setEotOutputDeactive(posi_axis, True)
+    posi.control.setControlOutput(posi_axis,True)
+    posi.move.setControlEotOutputDeactive(posi_axis, True)
     #posi.setReset(axis)
 
 axis_x = 0
@@ -129,16 +130,16 @@ pixelTimes = []
 totalPixels = 0
 
 for i, z in enumerate(z_pos):
-    posi.setTargetPosition(axis_z, z*1e3)
-    posi.setMove(axis_z,True)
+    posi.move.setControlTargetPosition(axis_z, z*1e3)
+    posi.control.setControlMove(axis_z,True)
     while posi.getStatusMoving(axis_z)[1] == 1: pass
-    posi.setMove(axis_z,False)
+    posi.control.setControlMove(axis_z,False)
     for k, y in enumerate(y_pos):
         lineTimer = time.perf_counter()
-        posi.setTargetPosition(axis_y, y*1e3)
-        posi.setMove(axis_y,True)
+        posi.move.setControlTargetPosition(axis_y, y*1e3)
+        posi.control.setControlMove(axis_y,True)
         while posi.getStatusMoving(axis_y)[1] == 1: pass
-        posi.setMove(axis_y,False)#
+        posi.control.setControlMove(axis_y,False)#
         if k%2 == 0:
             x_pos_shuf = x_pos
         else:
@@ -147,11 +148,11 @@ for i, z in enumerate(z_pos):
         for l, x in enumerate(x_pos_shuf):
             pixelTimer = time.perf_counter()
 
-            posi.setTargetPosition(axis_x, x*1e3)
-            posi.setMove(axis_x,True)
+            posi.move.setControlTargetPosition(axis_x, x*1e3)
+            posi.control.setControlMove(axis_x,True)
             while posi.getStatusMoving(axis_x)[1] == 1:
                 pass
-            posi.setMove(axis_x,False)
+            posi.control.setControlMove(axis_x,False)
             time.sleep(0.07)
             # Take a measure twice and dump it...
             do_meas(chnNo, bufSize)
@@ -186,10 +187,10 @@ for i, z in enumerate(z_pos):
         lineTimes.append(time.perf_counter() - lineTimer)
         #print('Counts: ' + str(means))
     # for axis in posi_axis:
-    #     posi.setTargetPosition(axis, 0*1e3)
-    #     posi.setMove(axis,True)
+    #     posi.move.setControlTargetPosition(axis, 0*1e3)
+    #     posi.control.setControlMove(axis,True)
     #     while posi.getStatusMoving(axis)[1] == 1: pass
-    #     posi.setMove(axis,False)#
+    #     posi.control.setControlMove(axis,False)#
 duration = round((time.perf_counter() - timer_all),2)
 print('Duration of scan: ' + str(duration))
 
@@ -238,9 +239,11 @@ meta_file.write('ASC-Settings:' + '\n' +
 meta_file.close()
 
 #%% Close devices
+
+posi.close()
+
 asc500.data.setCounterExposureTime(163e-3)
 
 asc500.base.stopServer()
 # laser.setLaserOFF()
 # laser.disconnect()
-
