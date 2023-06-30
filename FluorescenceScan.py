@@ -75,7 +75,6 @@ laser_pow = '4.5'
 # laser.setLaserPowerIn_mW('1', '0')
 # laser.setLaserPowerIn_mW('2', laser_pow)
 
-
 #Turn Laser ON
 # laser.setLaserON()
 time.sleep(1)
@@ -109,7 +108,7 @@ def do_meas(chnNo, bufSize):
     out = asc500.data.getDataBuffer(chnNo, 0, bufSize)
     counts = np.asarray(out[3][:])
     means_init.append(np.mean(counts))
-    sum_counts = sum(counts)
+    sum_counts = np.sum(counts)
     time_end = round(time.perf_counter(), 2) - time_start
     #print('Duration: ' + str(time_end) + ' s')
     return sum_counts, time_init, counts
@@ -176,16 +175,14 @@ for i, z in enumerate(z_pos):
                 timeRemaining = (len(y_pos) * len(x_pos) * len(z_pos) - totalPixels) * np.mean(pixelTimes)
             m, s = divmod(timeRemaining, 60)
             h, m = divmod(m, 60)
-            print('\rScan progress: {}%\tEstimated time remaining: {}:{}:{}    '.format(
-                percentageCalculator(totalPixels,
-                                     len(y_pos) * len(x_pos) * len(z_pos)),
-                                     int(h),
-                                     int(m),
-                                     int(s)),
-                                     end='', flush=True)
+            print('\rScan progress: {:5} %\tEstimated time remaining: {:2}:{:02}:{:02} \t'.format(
+                percentageCalculator(totalPixels, len(y_pos) * len(x_pos) * len(z_pos)),
+                int(h), int(m), int(s)),
+                end='', flush=True)
 
-        print(str(k + 1) + ' of ' + str(len(y_pos)) + ' rows scanned in '+
-              str(i + 1) + ' of ' + str(len(z_pos)) + ' planes')
+        print('{:3d} of {:3d} rows scanned in {:2d} of {:2d} planes'.format(
+              k + 1, len(y_pos),
+              i + 1, len(z_pos)))
         lineTimes.append(time.perf_counter() - lineTimer)
         #print('Counts: ' + str(means))
     # for axis in posi_axis:
@@ -202,9 +199,9 @@ np.save(os.path.join(SAVE_PATH,
 
 #%% Print heatmap for every z-layer
 for i, z in enumerate(z_pos):
-    param_dict = ('AoS: ' + area + r' $\mu$m / '+
+    param_dict = ('AoS: ' + area + ' \u03BCm / '+
                    'Res: ' + str(resolution*1e3) + ' nm / ' +
-                  'Depth:. ' + str(z) + '\u03BCm / ' +
+                  'Depth:. ' + str(z) + ' \u03BCm / ' +
                   'Exp-Time: ' + str(expTime*1e3) + ' ms')
     fig = plt.figure(1)
     pos = plt.imshow(heatmap[:,:,i], cmap = 'hot', interpolation='none')
@@ -212,11 +209,11 @@ for i, z in enumerate(z_pos):
     fig.colorbar(pos)
     yticks, xlabels = plt.yticks()
     xticks, ylabels = plt.xticks()
-    ylabels = yticks*resolution
-    xlabels = xticks*resolution
+    ylabels = yticks * resolution
+    xlabels = xticks * resolution
     plt.yticks(yticks[1:-1], ylabels[1:-1])
     plt.xticks(xticks[1:-1], xlabels[1:-1])
-    plt.text(0,yticks[-1]+((yticks[-1]-yticks[-2])), param_dict, fontsize=7,
+    plt.text(0, yticks[-1]+((yticks[-1]-yticks[-2])), param_dict, fontsize=7,
              bbox={'facecolor': 'white', 'alpha': 0.5, 'pad': 1})
 
     plt.show()
