@@ -9,9 +9,12 @@ The program requires to be at the surface of sample.
 
 import time
 import os
+import sys
 import numpy as np
 from matplotlib import pyplot as plt
 from ASClib import ASC500
+
+sys.path.append('AMClib')
 from AMClib import AMC
 
 #%% Create directories for saving data
