@@ -37,7 +37,7 @@ FSIZE = (11. / 2.54, 9. / 2.54)
 #%% Config Scan Parameters
 Area_x = 5 # in um
 Area_y = 5 # in um
-resolution = 0.1 # in um
+resolution = 0.5 # in um
 z_pos = [14, 17, 20, 23, 26, 29, 32, 35, 38]
 z_pos = [0]
 area = (str(Area_x) + 'x' + str(Area_y))
@@ -134,13 +134,13 @@ totalPixels = 0
 for i, z in enumerate(z_pos):
     posi.move.setControlTargetPosition(axis_z, z * 1e3)
     posi.control.setControlMove(axis_z, True)
-    while posi.status.getStatusMoving(axis_z)[1] == 1: pass
+    while posi.status.getStatusMoving(axis_z): pass
     posi.control.setControlMove(axis_z, False)
     for k, y in enumerate(y_pos):
         lineTimer = time.perf_counter()
         posi.move.setControlTargetPosition(axis_y, y * 1e3)
         posi.control.setControlMove(axis_y, True)
-        while posi.status.getStatusMoving(axis_y)[1] == 1: pass
+        while posi.status.getStatusMoving(axis_y): pass
         posi.control.setControlMove(axis_y, False)
         if k%2 == 0:
             x_pos_shuf = x_pos
@@ -152,7 +152,7 @@ for i, z in enumerate(z_pos):
 
             posi.move.setControlTargetPosition(axis_x, x * 1e3)
             posi.control.setControlMove(axis_x, True)
-            while posi.status.getStatusMoving(axis_x)[1] == 1:
+            while posi.status.getStatusMoving(axis_x):
                 pass
             posi.control.setControlMove(axis_x, False)
             time.sleep(0.07)
