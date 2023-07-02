@@ -12,10 +12,11 @@ import os
 import sys
 import numpy as np
 from matplotlib import pyplot as plt
-from ASClib import ASC500
 
 sys.path.append('AMClib')
 from AMClib import AMC
+from ASClib import ASC500
+import iBeam
 
 #%% Create directories for saving data
 
@@ -35,9 +36,9 @@ SAVE_FORMAT = 'png'
 FSIZE = (11. / 2.54, 9. / 2.54)
 
 #%% Config Scan Parameters
-Area_x = 5 # in um
-Area_y = 5 # in um
-resolution = 0.5 # in um
+Area_x = 35 # in um
+Area_y = 35 # in um
+resolution = 0.2 # in um
 z_pos = [14, 17, 20, 23, 26, 29, 32, 35, 38]
 z_pos = [0]
 area = (str(Area_x) + 'x' + str(Area_y))
@@ -71,7 +72,7 @@ print('Exposure time ', asc500.data.getCounterExposureTime())
 laser_pow = '4.5'
 
 # laser = iBeam.iBeam()
-# laser.connect('COM3')
+# laser.connect('COM4')
 # laser.setLaserPowerIn_mW('1', '0')
 # laser.setLaserPowerIn_mW('2', laser_pow)
 

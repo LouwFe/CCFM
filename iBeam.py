@@ -14,8 +14,8 @@ terminalString_getPower = "%SYS-I-077, scaled\r\nPIC  = 000000 uW  \r\nCMD>"
 
 class iBeam():
 
-    def __init__(self): # @todo CS
-        self.ser = serial.Serial() # @todo CS
+    def __init__(self):
+        self.ser = serial.Serial()
         self.ser.baudrate = 115200
         self.ser.timeout = 0.5
 
@@ -34,12 +34,13 @@ class iBeam():
 
         """
         self.ser.port = port
-        self.ser.open()
-        if (self.ser.is_open == True):
-            print('connected')
-        else:
-            print('ERROR: connection error')
-        return self.ser
+
+        try:
+            self.ser.open()
+        except serial.SerialException:
+            print('iBeam: serial port already open')
+            return None
+        print('iBeam connected')
 
     def disconnect(self):
         """ Disconnect from COM-Port/iBeam
@@ -52,7 +53,7 @@ class iBeam():
 
         """
         self.ser.close()
-        if (self.ser.is_open == False):
+        if self.ser.is_open == False:
             print('disconnected')
         else:
             print('ERROR: connection error')
@@ -265,7 +266,7 @@ class iBeam():
         status : str
             Status of the Autopulse feature (On/Off).
         '''
-        if (IO == 1):
+        if IO == 1:
             self.ser.write(b'ch 2 pow 0\r\n')
             self.ser.write(b'ch 1 pow ' + bytes(channel1power, encoding = 'utf-8') + b'\r\n')
             self.ser.write(b'pulse freq ' + bytes(freq, encoding = 'utf-8') + b'\r\n')
@@ -398,7 +399,7 @@ class iBeam():
             Status of the FINE feature (On/Off).
 
         '''
-        if (IO == 1):
+        if IO == 1:
             self.ser.write(b'ch 2 pow 0\r\n')
             self.ser.write(b'ch 1 pow ' + bytes(channel1power, encoding = 'utf-8') + '\r\n')
             self.ser.write(b'fine a 0\r\n')
@@ -500,7 +501,7 @@ class iBeam():
             Status of the FINE feature (On/Off).
 
         '''
-        if (IO == 1):
+        if IO == 1:
             self.ser.write(b'ch 2 pow 0\r\n')
             self.ser.write(b'ch 1 pow ' + bytes(channel1power, encoding = 'utf-8') + '\r\n')
             self.ser.write(b'skill on\r\n')
@@ -798,9 +799,9 @@ class iBeam():
         if "%SYS" in terminalString :
             ret = True
             return ret
-        else:
-            ret = False
-            return ret
+
+        ret = False
+        return ret
 
     def OutputToError(terminalString):
         """ Convert the eroor output of the terminal to a string containing only
@@ -825,8 +826,8 @@ class iBeam():
             errorstring = terminalString[start_str+2:end_str]
 
             return [errornumber, errorstring]
-        else:
-            return "No Error"
+
+        return "No Error"
 
     def getTerminalString2(self):
         """
@@ -965,6 +966,3 @@ class iBeam():
         else:
             val = 999
         return val
-
-
-
