@@ -5,8 +5,8 @@ Created on Thu Mar 12 16:43:05 2020
 @author: grundch
 """
 
-import serial
 import time
+import serial
 
 # Some variables for Testing, delete when finalised
 terminalString_getTemp = "%SYS-I-077, scaled\r\nTEMP = 025.0  C  \r\nCMD>"
@@ -40,7 +40,8 @@ class iBeam():
         except serial.SerialException:
             print('iBeam: serial port already open')
             return None
-        print('iBeam connected')
+        print('iBeam: connected')
+        return None
 
     def disconnect(self):
         """ Disconnect from COM-Port/iBeam
@@ -52,11 +53,13 @@ class iBeam():
             -------
 
         """
-        self.ser.close()
-        if self.ser.is_open == False:
-            print('disconnected')
-        else:
-            print('ERROR: connection error')
+        try:
+            self.ser.close()
+        except serial.SerialException:
+            print('iBeam: cant close port')
+            return None
+        print('iBeam: port closed')
+        return None
 
     # =============================================================================
     #   General Laser and Channel Control
