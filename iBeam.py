@@ -18,6 +18,7 @@ class iBeam():
         self.ser = serial.Serial()
         self.ser.baudrate = 115200
         self.ser.timeout = 0.5
+        self.ser.port = 0
 
     # =============================================================================
     #   Connection
