@@ -36,10 +36,9 @@ SAVE_FORMAT = 'png'
 FSIZE = (11. / 2.54, 9. / 2.54)
 
 #%% Config Scan Parameters
-Area_x = 15 # in um
-Area_y = 15 # in um
+Area_x = 25 # in um
+Area_y = 25 # in um
 resolution = 0.2 # in um
-z_pos = [14, 17, 20, 23, 26, 29, 32, 35, 38]
 z_pos = [0]
 area = (str(Area_x) + 'x' + str(Area_y))
 
@@ -108,8 +107,7 @@ def do_meas(chnNo, bufSize):
     out = asc500.data.getDataBuffer(chnNo, 0, bufSize)
     counts = np.asarray(out[3][:])
     sum_counts = np.sum(counts)
-    time_end = round(time.perf_counter(), 2) - time_start
-    #print('Duration: ' + str(time_end) + ' s')
+
     return sum_counts, time_init, counts
 
 def percentageCalculator(value, maxVal):
@@ -124,7 +122,7 @@ heatmap = np.ones((len(y_pos), len(x_pos), len(z_pos)))
 all_counts = []
 
 #%% Start scanning loop
-timer_all = round(time.perf_counter(), 2)
+timer_start = round(time.perf_counter(), 2)
 lineTimes = []
 pixelTimes = []
 totalPixels = 0
@@ -158,7 +156,7 @@ for i, z in enumerate(z_pos):
             do_meas(chnNo, bufSize)
             do_meas(chnNo, bufSize)
             # Then take a final measurement
-            sum_counts, times, counts = do_meas(chnNo, bufSize)
+            sum_counts, meas_time, counts = do_meas(chnNo, bufSize)
             all_counts.append(counts)
             if k%2 != 0:
                 l = len(x_pos_shuf) - 1 - l
@@ -189,8 +187,8 @@ for i, z in enumerate(z_pos):
     #     posi.control.setControlMove(axis, True)
     #     while posi.status.getStatusMoving(axis)[1] == 1: pass
     #     posi.control.setControlMove(axis, False)#
-duration = round((time.perf_counter() - timer_all), 2)
-print('Duration of scan: ' + str(duration))
+duration = round((time.perf_counter() - timer_start), 2)
+print('Duration of scan: {:.1f} min'.format(duration / 60))
 
 np.save(os.path.join(SAVE_PATH,
                      ('SCAN_' + str(Area_x) + ' x ' + str(Area_y) + '_heatmap')),
@@ -222,7 +220,7 @@ for i, z in enumerate(z_pos):
                 format = SAVE_FORMAT, dpi=1200, bbox_inches='tight')
 
 
-meta_file = open(os.path.join(SAVE_PATH, ('meta_data' + str(z) + '.txt')), "w")
+meta_file = open(os.path.join(SAVE_PATH, ('meta_data' + str(z) + '.txt')), 'w')
 meta_file.write('ASC-Settings:' + '\n' +
                 '\t Exposure Time: ' + str(expTime) + '\n' +
                 '\t Sampling Time: ' + str(sampTime) + '\n' +
