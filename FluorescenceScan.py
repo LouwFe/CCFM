@@ -199,8 +199,8 @@ np.save(os.path.join(SAVE_PATH,
 #%% Print heatmap for every z-layer
 for i, z in enumerate(z_pos):
     param_dict = ('AoS: ' + area + ' \u03BCm / '+
-                   'Res: ' + str(resolution*1e3) + ' nm / ' +
-                  'Depth:. ' + str(z) + ' \u03BCm / ' +
+                  'Res: ' + str(resolution*1e3) + ' nm / ' +
+                  'Depth: ' + str(z) + ' \u03BCm / ' +
                   'Exp-Time: ' + str(expTime*1e3) + ' ms')
     fig = plt.figure(1)
     pos = plt.imshow(heatmap[:,:,i], cmap = 'hot', interpolation='none')
