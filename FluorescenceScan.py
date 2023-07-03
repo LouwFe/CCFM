@@ -36,8 +36,8 @@ SAVE_FORMAT = 'png'
 FSIZE = (11. / 2.54, 9. / 2.54)
 
 #%% Config Scan Parameters
-Area_x = 35 # in um
-Area_y = 35 # in um
+Area_x = 15 # in um
+Area_y = 15 # in um
 resolution = 0.2 # in um
 z_pos = [14, 17, 20, 23, 26, 29, 32, 35, 38]
 z_pos = [0]
@@ -97,7 +97,6 @@ axis_z = 2
 
 #%% Define Measuring Routine
 def do_meas(chnNo, bufSize):
-    means_init = []
     time_init = []
     #print('Starting init measurement')
     time_start = round(time.perf_counter(), 2)
@@ -108,7 +107,6 @@ def do_meas(chnNo, bufSize):
     time_init.append(round(time.perf_counter(), 2) - time_start)
     out = asc500.data.getDataBuffer(chnNo, 0, bufSize)
     counts = np.asarray(out[3][:])
-    means_init.append(np.mean(counts))
     sum_counts = np.sum(counts)
     time_end = round(time.perf_counter(), 2) - time_start
     #print('Duration: ' + str(time_end) + ' s')
