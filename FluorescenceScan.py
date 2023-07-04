@@ -96,19 +96,17 @@ axis_z = 2
 
 #%% Define Measuring Routine
 def do_meas(chnNo, bufSize):
-    time_init = []
-    #print('Starting init measurement')
     time_start = round(time.perf_counter(), 2)
     while True:
         # Wait until buffer is full
         if asc500.data.waitForFullBuffer(chnNo) != 0:
             break
-    time_init.append(round(time.perf_counter(), 2) - time_start)
+    time_run = round(time.perf_counter(), 2) - time_start
     out = asc500.data.getDataBuffer(chnNo, 0, bufSize)
     counts = np.asarray(out[3][:])
     sum_counts = np.sum(counts)
 
-    return sum_counts, time_init, counts
+    return sum_counts, time_run, counts
 
 def percentageCalculator(value, maxVal):
     return round((value * 100 / maxVal), 2)
