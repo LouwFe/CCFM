@@ -179,7 +179,7 @@ for i, z in enumerate(z_pos):
               k + 1, len(y_pos),
               i + 1, len(z_pos)))
         lineTimes.append(time.perf_counter() - lineTimer)
-        #print('Counts: ' + str(means))
+
     # for axis in posi_axis:
     #     posi.move.setControlTargetPosition(axis, 0 * 1e3)
     #     posi.control.setControlMove(axis, True)
