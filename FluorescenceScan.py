@@ -36,15 +36,15 @@ SAVE_FORMAT = 'png'
 FSIZE = (11. / 2.54, 9. / 2.54)
 
 #%% Config Scan Parameters
-Area_x = 25 # in um
-Area_y = 25 # in um
+Area_x = 40 # in um
+Area_y = 40 # in um
 resolution = 0.2 # in um
 z_pos = [0]
 area = (str(Area_x) + 'x' + str(Area_y))
 
 #%% Config ASC
 expTime = 1e-3
-sampTime = 1e-3
+sampTime = expTime
 average = 0
 chnNo = 0
 bufSize = 160
@@ -199,7 +199,7 @@ for i, z in enumerate(z_pos):
                   'Depth: ' + str(z) + ' \u03BCm / ' +
                   'Exp-Time: ' + str(expTime * 1e3) + ' ms')
     fig = plt.figure(1)
-    img = plt.imshow(heatmap[:,:,i], cmap = 'hot', interpolation='none')
+    img = plt.imshow(heatmap[:,:,i], cmap = 'viridis', interpolation='none')
     plt.title(str(Area_x) + ' x ' + str(Area_y) + ' \u03BC' +'m Scan')
     fig.colorbar(img)
 
