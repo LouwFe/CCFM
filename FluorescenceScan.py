@@ -195,21 +195,24 @@ np.save(os.path.join(SAVE_PATH,
 #%% Print heatmap for every z-layer
 for i, z in enumerate(z_pos):
     param_dict = ('AoS: ' + area + ' \u03BCm / '+
-                  'Res: ' + str(resolution*1e3) + ' nm / ' +
+                  'Res: ' + str(resolution * 1e3) + ' nm / ' +
                   'Depth: ' + str(z) + ' \u03BCm / ' +
-                  'Exp-Time: ' + str(expTime*1e3) + ' ms')
+                  'Exp-Time: ' + str(expTime * 1e3) + ' ms')
     fig = plt.figure(1)
-    pos = plt.imshow(heatmap[:,:,i], cmap = 'hot', interpolation='none')
+    img = plt.imshow(heatmap[:,:,i], cmap = 'hot', interpolation='none')
     plt.title(str(Area_x) + ' x ' + str(Area_y) + ' \u03BC' +'m Scan')
-    fig.colorbar(pos)
+    fig.colorbar(img)
+
     yticks, xlabels = plt.yticks()
     xticks, ylabels = plt.xticks()
     ylabels = yticks * resolution
     xlabels = xticks * resolution
     plt.yticks(yticks[1:-1], ylabels[1:-1])
     plt.xticks(xticks[1:-1], xlabels[1:-1])
+    plt.tick_params(direction='in', which='both')
+
     plt.text(0,
-             yticks[-1] + ((yticks[-1] - yticks[-2])),
+             yticks[-1] + (yticks[-1] - yticks[-2]),
              param_dict,
              fontsize=7,
              bbox={'facecolor': 'white', 'alpha': 0.5, 'pad': 1})
