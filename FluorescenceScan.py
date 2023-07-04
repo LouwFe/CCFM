@@ -208,7 +208,10 @@ for i, z in enumerate(z_pos):
     xlabels = xticks * resolution
     plt.yticks(yticks[1:-1], ylabels[1:-1])
     plt.xticks(xticks[1:-1], xlabels[1:-1])
-    plt.text(0, yticks[-1]+((yticks[-1]-yticks[-2])), param_dict, fontsize=7,
+    plt.text(0,
+             yticks[-1] + ((yticks[-1] - yticks[-2])),
+             param_dict,
+             fontsize=7,
              bbox={'facecolor': 'white', 'alpha': 0.5, 'pad': 1})
 
     plt.show()
