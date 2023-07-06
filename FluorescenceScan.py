@@ -36,9 +36,9 @@ SAVE_FORMAT = 'png'
 FSIZE = (11. / 2.54, 9. / 2.54)
 
 #%% Config Scan Parameters
-Area_x = 40 # in um
-Area_y = 40 # in um
-resolution = 0.2 # in um
+Area_x = 3 # in um
+Area_y = 3 # in um
+resolution = 0.08 # in um
 z_pos = [0]
 area = (str(Area_x) + 'x' + str(Area_y))
 
@@ -205,8 +205,8 @@ for i, z in enumerate(z_pos):
 
     yticks, xlabels = plt.yticks()
     xticks, ylabels = plt.xticks()
-    ylabels = yticks * resolution
-    xlabels = xticks * resolution
+    ylabels = np.round(yticks * resolution, 2)
+    xlabels = np.round(xticks * resolution, 2)
     plt.yticks(yticks[1:-1], ylabels[1:-1])
     plt.xticks(xticks[1:-1], xlabels[1:-1])
     plt.tick_params(direction='in', which='both')
